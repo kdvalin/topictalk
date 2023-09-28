@@ -34,7 +34,7 @@ private:
 			payload.push_back((char) ((rand() % (MAX_ASCII - MIN_ASCII)) + MIN_ASCII));
 		}
 		message.frame_id = payload;
-		message.stamp = rclcpp::Clock().now();
+		message.stamp = this->get_clock()->now();
 		this->_publisher->publish(message);
 	}
 };

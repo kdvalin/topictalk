@@ -25,7 +25,7 @@ private:
         size_t bytes_received = data.frame_id.length();
         auto recv_time = data.stamp;
 
-        auto transmission_time = rclcpp::Clock().now() - recv_time;
+        auto transmission_time = this->get_clock()->now() - recv_time;
         RCLCPP_DEBUG(this->get_logger(), "Received %ld bytes in %ld nanoseconds", bytes_received, transmission_time.nanoseconds());
     }
 };

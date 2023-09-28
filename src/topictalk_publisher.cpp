@@ -17,9 +17,8 @@ namespace TopicTalk {
 class Publisher : public rclcpp::Node {
 public:
 	Publisher() : Node("topictalk_publisher") {
-		std::string payload = "";
 		for(int i = 0; i < MESSAGE_LENGTH; ++i) {
-			payload.push_back((char) ((rand() % (MAX_ASCII - MIN_ASCII)) + MIN_ASCII));
+			_payload.push_back((char) ((rand() % (MAX_ASCII - MIN_ASCII)) + MIN_ASCII));
 		}
 		this->_publisher = this->create_publisher<std_msgs::msg::Header>(TOPIC_NAME, 10);
 

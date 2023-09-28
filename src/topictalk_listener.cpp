@@ -14,19 +14,25 @@ namespace TopicTalk {
 class Subscriber : public rclcpp::Node {
 public:
 	Subscriber() : Node("topictalk_sub") {
+        this->_start_time = this->get_clock()->now();
 		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(&Subscriber::callback, this, _1));
 	}
+    ~Subscriber() {
+        auto end = this->get_clock()->now();
+        RCLCPP_INFO(this->get_logger(), "Average: %f B/s", byte_counter/((end - this->_start_time).seconds()));
+    }
 private:
 	rclcpp::Subscription<std_msgs::msg::Header>::SharedPtr _sub;
     size_t byte_counter;
-    time_t start_time;
+    rclcpp::Time _start_time;
 
-    void callback(const std_msgs::msg::Header &data) const {
-        size_t bytes_received = data.frame_id.length();
+    void callback(const std_msgs::msg::Header &data) {
+        size_t bytes_received = data.frame_id.length() + sizeof(data.stamp.sec)*2;
         auto recv_time = data.stamp;
 
         auto transmission_time = this->get_clock()->now() - recv_time;
-        RCLCPP_DEBUG(this->get_logger(), "Received %ld bytes in %ld nanoseconds", bytes_received, transmission_time.nanoseconds());
+        RCLCPP_INFO(this->get_logger(), "Received %ld bytes in %f seconds (%ld nanoseconds).  %f B/s", bytes_received, transmission_time.seconds(), transmission_time.nanoseconds(), bytes_received);
+        this->byte_counter += bytes_received;
     }
 };
 

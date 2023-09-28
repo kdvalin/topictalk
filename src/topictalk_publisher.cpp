@@ -31,7 +31,7 @@ private:
 		auto message = std_msgs::msg::String();
 		std::string payload = "";
 		for(int i = 0; i < MESSAGE_LENGTH; ++i) {
-			payload.push_back((char) ((rand() % MAX_ASCII) + MIN_ASCII));
+			payload.push_back((char) ((rand() % (MAX_ASCII - MIN_ASCII)) + MIN_ASCII));
 		}
 		message.data = payload;
 		this->_publisher->publish(message);

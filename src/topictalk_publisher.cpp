@@ -17,6 +17,10 @@ namespace TopicTalk {
 class Publisher : public rclcpp::Node {
 public:
 	Publisher() : Node("topictalk_publisher") {
+		std::string payload = "";
+		for(int i = 0; i < MESSAGE_LENGTH; ++i) {
+			payload.push_back((char) ((rand() % (MAX_ASCII - MIN_ASCII)) + MIN_ASCII));
+		}
 		this->_publisher = this->create_publisher<std_msgs::msg::Header>(TOPIC_NAME, 10);
 
 		RCLCPP_DEBUG(this->get_logger(), "Opened %s topic", TOPIC_NAME);
@@ -26,14 +30,11 @@ public:
 private:
 	rclcpp::Publisher<std_msgs::msg::Header>::SharedPtr _publisher;
 	rclcpp::TimerBase::SharedPtr _timer;
+	std::string _payload;
 
 	void callback() {
 		auto message = std_msgs::msg::Header();
-		std::string payload = "";
-		for(int i = 0; i < MESSAGE_LENGTH; ++i) {
-			payload.push_back((char) ((rand() % (MAX_ASCII - MIN_ASCII)) + MIN_ASCII));
-		}
-		message.frame_id = payload;
+		message.frame_id = _payload;
 		message.stamp = this->get_clock()->now();
 		this->_publisher->publish(message);
 	}

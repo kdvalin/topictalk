@@ -8,7 +8,7 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(example_interfaces REQUIRED)
+find_package(std_msgs REQUIRED)
 
 add_executable(topictalk_publisher src/topictalk_publisher.cpp)
 target_include_directories(topictalk_publisher PUBLIC
@@ -18,7 +18,7 @@ target_compile_features(topictalk_publisher PUBLIC c_std_99 cxx_std_17)  # Requi
 ament_target_dependencies(
   topictalk_publisher
   "rclcpp"
-  "example_interfaces"
+  "std_msgs"
 )
 
 install(TARGETS topictalk_publisher

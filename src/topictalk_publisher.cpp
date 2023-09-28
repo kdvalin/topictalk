@@ -6,7 +6,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/string.hpp"
 
-#include "topic.hpp"
+#include "topictalk/topic.hpp"
 
 using namespace std::chrono_literals;
 

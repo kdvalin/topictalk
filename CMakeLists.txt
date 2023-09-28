@@ -11,18 +11,25 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 
 add_executable(topictalk_publisher src/topictalk_publisher.cpp)
-target_include_directories(topictalk_publisher PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-target_compile_features(topictalk_publisher PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(
-  topictalk_publisher
-  "rclcpp"
-  "std_msgs"
-)
+add_executable(topictalk_listener src/topictalk_listener.cpp)
+set(EXECUTABLES "topictalk_listener;topictalk_publisher")
 
-install(TARGETS topictalk_publisher
-  DESTINATION lib/${PROJECT_NAME})
+foreach(EXECUTABLE IN LISTS EXECUTABLES)
+  target_include_directories(${EXECUTABLE} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>)
+
+  target_compile_features(${EXECUTABLE} PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+
+  ament_target_dependencies(
+    ${EXECUTABLE}
+    "rclcpp"
+    "std_msgs"
+  )
+
+  install(TARGETS ${EXECUTABLE}
+    DESTINATION lib/${PROJECT_NAME})
+endforeach(EXECUTABLE IN LISTS EXECUTABLES)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

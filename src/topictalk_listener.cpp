@@ -8,11 +8,13 @@
 
 #include "topictalk/topic.hpp"
 
+using std::placeholders::_1;
+
 namespace TopicTalk {
 class Subscriber : public rclcpp::Node {
 public:
 	Subscriber() : Node("topictalk_sub") {
-		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(&Subscriber::callback, this));
+		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(&Subscriber::callback, this, _1));
 	}
 private:
 	rclcpp::Subscription<std_msgs::msg::Header>::SharedPtr _sub;

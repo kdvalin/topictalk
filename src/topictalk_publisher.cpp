@@ -4,7 +4,7 @@
 #include <string>
 
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"
+#include "std_msgs/msg/header.hpp"
 
 #include "topictalk/topic.hpp"
 
@@ -17,23 +17,24 @@ namespace TopicTalk {
 class Publisher : public rclcpp::Node {
 public:
 	Publisher() : Node("topictalk_publisher") {
-		this->_publisher = this->create_publisher<std_msgs::msg::String>(TOPIC_NAME, 10);
+		this->_publisher = this->create_publisher<std_msgs::msg::Header>(TOPIC_NAME, 10);
 
 		RCLCPP_DEBUG(this->get_logger(), "Opened %s topic", TOPIC_NAME);
 		this->_timer = this->create_wall_timer(500ms, std::bind(&Publisher::callback, this));
 		RCLCPP_DEBUG(this->get_logger(), "Created timer");
 	}
 private:
-	rclcpp::Publisher<std_msgs::msg::String>::SharedPtr _publisher;
+	rclcpp::Publisher<std_msgs::msg::Header>::SharedPtr _publisher;
 	rclcpp::TimerBase::SharedPtr _timer;
 
 	void callback() {
-		auto message = std_msgs::msg::String();
+		auto message = std_msgs::msg::Header();
 		std::string payload = "";
 		for(int i = 0; i < MESSAGE_LENGTH; ++i) {
 			payload.push_back((char) ((rand() % (MAX_ASCII - MIN_ASCII)) + MIN_ASCII));
 		}
-		message.data = payload;
+		message.frame_id = payload;
+		message.stamp = rclcpp::Clock().now();
 		this->_publisher->publish(message);
 	}
 };

@@ -31,7 +31,7 @@ private:
         auto recv_time = data.stamp;
 
         auto transmission_time = this->get_clock()->now() - recv_time;
-        RCLCPP_INFO(this->get_logger(), "Received %ld bytes in %f seconds (%ld nanoseconds).  %f B/s", bytes_received, transmission_time.seconds(), transmission_time.nanoseconds(), bytes_received);
+        RCLCPP_INFO(this->get_logger(), "Received %ld bytes in %f seconds (%ld nanoseconds).  %f B/s", bytes_received, transmission_time.seconds(), transmission_time.nanoseconds(), bytes_received / transmission_time.seconds());
         this->byte_counter += bytes_received;
     }
 };

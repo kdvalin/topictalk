@@ -18,7 +18,7 @@ public:
 		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(&Subscriber::callback, this, _1));
 	}
     ~Subscriber() {
-        RCLCPP_INFO(this->get_logger(), "Average: %f B/s", byte_counter/(transmission_time/1e9));
+        RCLCPP_INFO(this->get_logger(), "Average: %f B/s", format_bytes(byte_counter/(transmission_time/1e9)));
     }
 private:
 	rclcpp::Subscription<std_msgs::msg::Header>::SharedPtr _sub;
@@ -31,12 +31,24 @@ private:
         auto recv_time = data.stamp;
 
         auto transmission_time = this->get_clock()->now() - recv_time;
-        RCLCPP_INFO(this->get_logger(), "Received %ld bytes in %f seconds (%ld nanoseconds).  %f B/s", bytes_received, transmission_time.seconds(), transmission_time.nanoseconds(), bytes_received / transmission_time.seconds());
+        RCLCPP_INFO(this->get_logger(), "Received %s in %f seconds (%ld nanoseconds).  %s/s", format_bytes(bytes_received), transmission_time.seconds(), transmission_time.nanoseconds(), format_bytes(bytes_received / transmission_time.seconds()));
         this->byte_counter += bytes_received;
         this->transmission_time += transmission_time.nanoseconds();
     }
 };
 
+}
+
+std::string format_bytes(int bytes) {
+    constexpr const char FILE_SIZE_UNITS[8][4] {
+        "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB"
+    };
+
+    int index = log2(bytes)/10;
+    bytes >> (int) pow(2, 10*index);
+    std::stringstream ss{};
+    ss << bytes << " " << FILE_SIZE_UNITS[index];
+    return ss.str();
 }
 
 int main(int argc, char ** argv) {

@@ -17,13 +17,19 @@ namespace TopicTalk {
 class Publisher : public rclcpp::Node {
 public:
 	Publisher() : Node("topictalk_publisher") {
-		for(int i = 0; i < MESSAGE_LENGTH; ++i) {
+		declare_parameter(MESSAGE_LENGTH_PARAM, 4096);
+		declare_parameter(MESSAGE_INTERVAL, 0.500);
+		auto length = get_parameter(MESSAGE_LENGTH_PARAM);
+		auto msg_interval = get_parameter(MESSAGE_INTERVAL);
+
+		for(auto i = length.as_int(); i > 0; --i) {
 			_payload.push_back((char) ((rand() % (MAX_ASCII - MIN_ASCII)) + MIN_ASCII));
 		}
+
 		this->_publisher = this->create_publisher<std_msgs::msg::Header>(TOPIC_NAME, 10);
 
 		RCLCPP_DEBUG(this->get_logger(), "Opened %s topic", TOPIC_NAME);
-		this->_timer = this->create_wall_timer(500ms, std::bind(&Publisher::callback, this));
+		this->_timer = this->create_wall_timer(std::chrono::duration<double>(msg_interval.as_double()), std::bind(&Publisher::callback, this));
 		RCLCPP_DEBUG(this->get_logger(), "Created timer");
 	}
 private:

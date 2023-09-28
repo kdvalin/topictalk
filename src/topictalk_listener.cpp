@@ -12,7 +12,7 @@ namespace TopicTalk {
 class Subscriber : public rclcpp::Node {
 public:
 	Subscriber() : Node("topictalk_sub") {
-		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(Subscriber::callback, this));
+		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(&Subscriber::callback, this));
 	}
 private:
 	rclcpp::Subscription<std_msgs::msg::Header>::SharedPtr _sub;
@@ -24,7 +24,7 @@ private:
         auto recv_time = data.stamp;
 
         auto transmission_time = rclcpp::Clock().now() - recv_time;
-        RCLCPP_DEBUG(this->get_logger(), "Received %d bytes in %d nanoseconds", bytes_received, transmission_time.nanoseconds());
+        RCLCPP_DEBUG(this->get_logger(), "Received %ld bytes in %ld nanoseconds", bytes_received, transmission_time.nanoseconds());
     }
 };
 

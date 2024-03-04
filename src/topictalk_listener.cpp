@@ -18,7 +18,7 @@ public:
 		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(&Subscriber::callback, this, _1));
 	}
     ~Subscriber() {
-        RCLCPP_INFO(this->get_logger(), "Average: %f B/s", format_bytes(byte_counter/(transmission_time/1e9)));
+        RCLCPP_INFO(this->get_logger(), "Average: %s", format_bytes(byte_counter/(transmission_time/1e9)).c_str() );
     }
 private:
 	rclcpp::Subscription<std_msgs::msg::Header>::SharedPtr _sub;
@@ -31,7 +31,7 @@ private:
         auto recv_time = data.stamp;
 
         auto transmission_time = this->get_clock()->now() - recv_time;
-        RCLCPP_INFO(this->get_logger(), "Received %s in %f seconds (%ld nanoseconds).  %s/s", format_bytes(bytes_received), transmission_time.seconds(), transmission_time.nanoseconds(), format_bytes(bytes_received / transmission_time.seconds()));
+        RCLCPP_INFO(this->get_logger(), "Received %s in %f seconds (%ld nanoseconds).  %s/s", format_bytes(bytes_received).c_str(), transmission_time.seconds(), transmission_time.nanoseconds(), format_bytes(bytes_received / transmission_time.seconds()));
         this->byte_counter += bytes_received;
         this->transmission_time += transmission_time.nanoseconds();
     }

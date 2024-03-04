@@ -39,13 +39,13 @@ private:
 
 }
 
-std::string format_bytes(int bytes) {
+std::string format_bytes(double bytes) {
     constexpr const char FILE_SIZE_UNITS[8][4] {
         "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB"
     };
 
     int index = log2(bytes)/10;
-    bytes >> (int) pow(2, 10*index);
+    bytes = bytes/(pow(2,index*10));
     std::stringstream ss{};
     ss << bytes << " " << FILE_SIZE_UNITS[index];
     return ss.str();

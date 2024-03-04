@@ -10,6 +10,18 @@
 
 using std::placeholders::_1;
 
+std::string format_bytes(double bytes) {
+    constexpr const char FILE_SIZE_UNITS[8][4] {
+        "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB"
+    };
+
+    int index = log2(bytes)/10;
+    bytes = bytes/(pow(2,index*10));
+    std::stringstream ss{};
+    ss << bytes << " " << FILE_SIZE_UNITS[index];
+    return ss.str();
+}
+
 namespace TopicTalk {
 class Subscriber : public rclcpp::Node {
 public:
@@ -37,18 +49,6 @@ private:
     }
 };
 
-}
-
-std::string format_bytes(double bytes) {
-    constexpr const char FILE_SIZE_UNITS[8][4] {
-        "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB"
-    };
-
-    int index = log2(bytes)/10;
-    bytes = bytes/(pow(2,index*10));
-    std::stringstream ss{};
-    ss << bytes << " " << FILE_SIZE_UNITS[index];
-    return ss.str();
 }
 
 int main(int argc, char ** argv) {

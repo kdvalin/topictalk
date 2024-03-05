@@ -26,7 +26,7 @@ namespace TopicTalk {
 class Subscriber : public rclcpp::Node {
 public:
 	Subscriber() : Node("topictalk_sub") {
-		declare_parameter(HUMAN_UNITS, false);
+		declare_parameter(HUMAN_UNITS, true);
 		this->human_units = get_parameter(HUMAN_UNITS).as_bool();
 		this->_start_time = this->get_clock()->now();
 		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(&Subscriber::callback, this, _1));
@@ -44,13 +44,13 @@ private:
 	std::string status_message(size_t bytes_received, double duration_s) {
 		std::stringstream ss;
 		ss << "Received " << format_bytes(bytes_received) << " in " <<
-			duration_s;
+			duration_s << " ";
 		
 		double rate = bytes_received / duration_s;
 		if(human_units) {
 			ss << format_bytes(rate);
 		} else {
-			ss << rate;
+			ss << rate << "B";
 		}
 		ss << "/s";
 		return ss.str();

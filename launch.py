@@ -31,13 +31,28 @@ def declare_args():
 	]
 
 def generate_launch_description():
-	num_topics = int(get_arg("ntopic", "1"))
-	num_publishers = int(get_arg("npubs", "1"))
-	num_subscriptions = int(get_arg("nsubs", "1"))
+	ld = LaunchDescription()
+	num_topics = int(get_arg("topics", "1"))
+	num_publishers = int(get_arg("pubs", "1"))
+	num_subscriptions = int(get_arg("subs", "1"))
 
 	block_size = LaunchConfiguration("bs", default=TextSubstitution(text="4096"))
 
-	return LaunchDescription([
-		Node(package="topictalk", executable="topictalk_publisher", parameters=[{"msg_length": block_size }]),
-		Node(package="topictalk", executable="topictalk_listener")
-	])
+	for i in range(num_topics):
+		for j in range(num_publishers):
+			ld.add_entity(Node(
+				package="topictalk",
+				executable="topictalk_publisher",
+				parameters=[{"msg_length": block_size}],
+				namespace=f"topictalk_{i}",
+				name=f"topictalk_pub_{j}"
+			))
+		for j in range(num_subscriptions):
+			ld.add_entity(Node(
+				package="topictalk",
+				executable="topictalk_listener",
+				namespace=f"topictalk_{i}",
+				name=f"topictalk_sub_{j}"
+			))
+
+	return ld

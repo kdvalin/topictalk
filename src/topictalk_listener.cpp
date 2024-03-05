@@ -26,30 +26,46 @@ namespace TopicTalk {
 class Subscriber : public rclcpp::Node {
 public:
 	Subscriber() : Node("topictalk_sub") {
+		declare_parameter(HUMAN_UNITS, false);
+		this->human_units = get_parameter(HUMAN_UNITS).as_bool();
 		this->_start_time = this->get_clock()->now();
 		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(&Subscriber::callback, this, _1));
 	}
 	~Subscriber() {
-		RCLCPP_INFO(this->get_logger(), "Average: %s/s", format_bytes(byte_counter/(transmission_time/1e9)).c_str() );
+		RCLCPP_INFO_STREAM(this->get_logger(), status_message(byte_counter, transmission_time/1e9));
 	}
 private:
 	rclcpp::Subscription<std_msgs::msg::Header>::SharedPtr _sub;
 	size_t byte_counter;
 	rclcpp::Time _start_time;
 	time_t transmission_time;
+	bool human_units;
+
+	std::string status_message(size_t bytes_received, double duration_s) {
+		std::stringstream ss;
+		ss << "Received " << format_bytes(bytes_received) << " in " <<
+			duration_s;
+		
+		double rate = bytes_received / duration_s;
+		if(human_units) {
+			ss << format_bytes(rate);
+		} else {
+			ss << rate;
+		}
+		ss << "/s";
+		return ss.str();
+	}
 
 	void callback(const std_msgs::msg::Header &data) {
 		size_t bytes_received = data.frame_id.length() + sizeof(data.stamp.sec)*2;
 		auto recv_time = data.stamp;
 
 		auto transmission_time = this->get_clock()->now() - recv_time;
-		RCLCPP_INFO(
+
+
+		RCLCPP_INFO_STREAM(
 			this->get_logger(),
-			"Received %s in %f seconds (%ld nanoseconds).  %s/s",
-			format_bytes(bytes_received).c_str(),
-			transmission_time.seconds(),
-			transmission_time.nanoseconds(),
-			format_bytes(bytes_received / transmission_time.seconds()).c_str()
+			status_message(bytes_received, transmission_time.seconds())
 		);
 		this->byte_counter += bytes_received;
 		this->transmission_time += transmission_time.nanoseconds();

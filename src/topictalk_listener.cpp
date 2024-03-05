@@ -11,49 +11,49 @@
 using std::placeholders::_1;
 
 std::string format_bytes(double bytes) {
-    constexpr const char FILE_SIZE_UNITS[8][4] {
-        "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB"
-    };
+	constexpr const char FILE_SIZE_UNITS[8][4] {
+		"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB"
+	};
 
-    int index = log2(bytes)/10;
-    bytes = bytes/(pow(2,index*10));
-    std::stringstream ss{};
-    ss << bytes << " " << FILE_SIZE_UNITS[index];
-    return ss.str();
+	int index = log2(bytes)/10;
+	bytes = bytes/(pow(2,index*10));
+	std::stringstream ss{};
+	ss << bytes << " " << FILE_SIZE_UNITS[index];
+	return ss.str();
 }
 
 namespace TopicTalk {
 class Subscriber : public rclcpp::Node {
 public:
 	Subscriber() : Node("topictalk_sub") {
-        this->_start_time = this->get_clock()->now();
+		this->_start_time = this->get_clock()->now();
 		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(&Subscriber::callback, this, _1));
 	}
-    ~Subscriber() {
-        RCLCPP_INFO(this->get_logger(), "Average: %s/s", format_bytes(byte_counter/(transmission_time/1e9)).c_str() );
-    }
+	~Subscriber() {
+		RCLCPP_INFO(this->get_logger(), "Average: %s/s", format_bytes(byte_counter/(transmission_time/1e9)).c_str() );
+	}
 private:
 	rclcpp::Subscription<std_msgs::msg::Header>::SharedPtr _sub;
-    size_t byte_counter;
-    rclcpp::Time _start_time;
-    time_t transmission_time;
+	size_t byte_counter;
+	rclcpp::Time _start_time;
+	time_t transmission_time;
 
-    void callback(const std_msgs::msg::Header &data) {
-        size_t bytes_received = data.frame_id.length() + sizeof(data.stamp.sec)*2;
-        auto recv_time = data.stamp;
+	void callback(const std_msgs::msg::Header &data) {
+		size_t bytes_received = data.frame_id.length() + sizeof(data.stamp.sec)*2;
+		auto recv_time = data.stamp;
 
-        auto transmission_time = this->get_clock()->now() - recv_time;
-        RCLCPP_INFO(
-            this->get_logger(),
-            "Received %s in %f seconds (%ld nanoseconds).  %s/s",
-            format_bytes(bytes_received).c_str(),
-            transmission_time.seconds(),
-            transmission_time.nanoseconds(),
-            format_bytes(bytes_received / transmission_time.seconds()).c_str()
-        );
-        this->byte_counter += bytes_received;
-        this->transmission_time += transmission_time.nanoseconds();
-    }
+		auto transmission_time = this->get_clock()->now() - recv_time;
+		RCLCPP_INFO(
+			this->get_logger(),
+			"Received %s in %f seconds (%ld nanoseconds).  %s/s",
+			format_bytes(bytes_received).c_str(),
+			transmission_time.seconds(),
+			transmission_time.nanoseconds(),
+			format_bytes(bytes_received / transmission_time.seconds()).c_str()
+		);
+		this->byte_counter += bytes_received;
+		this->transmission_time += transmission_time.nanoseconds();
+	}
 };
 
 }

@@ -36,14 +36,16 @@ def generate_launch_description():
 	num_publishers = int(get_arg("pubs", "1"))
 	num_subscriptions = int(get_arg("subs", "1"))
 
+	interval = LaunchConfiguration("interval", default=TextSubstitution(text="0.5"))
 	block_size = LaunchConfiguration("bs", default=TextSubstitution(text="4096"))
+	human_readable = LaunchConfiguration("human", default=TextSubstitution(text="true"))
 
 	for i in range(num_topics):
 		for j in range(num_publishers):
 			ld.add_entity(Node(
 				package="topictalk",
 				executable="topictalk_publisher",
-				parameters=[{"msg_length": block_size}],
+				parameters=[{"msg_length": block_size, "msg_interval": interval, "human_read": human_readable}],
 				namespace=f"topictalk_{i}",
 				name=f"topictalk_pub_{j}"
 			))

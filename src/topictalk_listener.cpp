@@ -32,7 +32,7 @@ public:
 		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(&Subscriber::callback, this, _1));
 	}
 	~Subscriber() {
-		RCLCPP_INFO_STREAM(this->get_logger(), status_message(byte_counter, transmission_time/1e9));
+		RCLCPP_INFO_STREAM(this->get_logger(), "End of run: " << status_message(byte_counter, transmission_time/1e9) );
 	}
 private:
 	rclcpp::Subscription<std_msgs::msg::Header>::SharedPtr _sub;

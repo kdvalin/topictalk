@@ -35,8 +35,8 @@ def generate_launch_description():
 	num_topics = int(get_arg("topics", "1"))
 	num_publishers = int(get_arg("pubs", "1"))
 	num_subscriptions = int(get_arg("subs", "1"))
+	interval = float(get_arg("interval", "0.5"))
 
-	interval = LaunchConfiguration("interval", default=TextSubstitution(text="0.5"))
 	block_size = LaunchConfiguration("bs", default=TextSubstitution(text="4096"))
 	human_readable = LaunchConfiguration("human", default=TextSubstitution(text="true"))
 

@@ -2,6 +2,9 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <vector>
+#include <algorithm>
+#include <cmath>
 
 #include "rclcpp/rclcpp.hpp"
 #include "std_msgs/msg/header.hpp"
@@ -22,6 +25,12 @@ std::string format_bytes(double bytes) {
 	return ss.str();
 }
 
+//Assumes sorted
+double percentile(double percentile, const std::vector<double> &arr) {
+	int index = arr.size() * percentile;
+	return (arr[(int) floor(index)] + arr[(int) ceil(index)])/2;
+}
+
 namespace TopicTalk {
 class Subscriber : public rclcpp::Node {
 public:
@@ -32,7 +41,22 @@ public:
 		this->_sub = this->create_subscription<std_msgs::msg::Header>(TOPIC_NAME, 10, std::bind(&Subscriber::callback, this, _1));
 	}
 	~Subscriber() {
-		RCLCPP_INFO_STREAM(this->get_logger(), "End of run: " << status_message(byte_counter, transmission_time/1e9) );
+		std::sort(this->transmission_times.begin(), this->transmission_times.end());
+		
+		double min = transmission_times[0];
+		double q1 = percentile(0.25, transmission_times);
+		double median = percentile(0.5, transmission_times);
+		double q3 = percentile(0.75, transmission_times);
+		double p99 = percentile(0.99, transmission_times);
+		double max = transmission_times[transmission_times.size() - 1];
+
+		RCLCPP_INFO_STREAM(
+			this->get_logger(),
+			"End of run: " << status_message(byte_counter, transmission_time/1e9) << std::endl <<
+			"min lat " << min << "s" << std::endl << "25% lat " << q1 << "s" << std::endl <<
+			"median lat " << median << "s" << std::endl << "75% lat " << q3 << "s" << std::endl <<
+			"99% lat " << p99 << "s" << std::endl << "max lat " << max << "s" << std::endl; 
+		);
 	}
 private:
 	rclcpp::Subscription<std_msgs::msg::Header>::SharedPtr _sub;
@@ -40,17 +64,18 @@ private:
 	rclcpp::Time _start_time;
 	time_t transmission_time;
 	bool human_units;
+	std::vector<double> transmission_times;
 
 	std::string status_message(size_t bytes_received, double duration_s) {
 		std::stringstream ss;
 		ss << "Received " << format_bytes(bytes_received) << " in " <<
-			duration_s << " ";
+			duration_s << "s ";
 		
 		double rate = bytes_received / duration_s;
 		if(human_units) {
 			ss << format_bytes(rate);
 		} else {
-			ss << rate << "B";
+			ss << rate << " B";
 		}
 		ss << "/s";
 		return ss.str();
@@ -61,6 +86,7 @@ private:
 		auto recv_time = data.stamp;
 
 		auto transmission_time = this->get_clock()->now() - recv_time;
+		this->transmisssion_times.push_back(transmission_time);
 
 
 		RCLCPP_INFO_STREAM(

@@ -86,7 +86,7 @@ private:
 		auto recv_time = data.stamp;
 
 		auto transmission_time = this->get_clock()->now() - recv_time;
-		this->transmisssion_times.push_back(transmission_time);
+		this->transmission_times.push_back(transmission_time.seconds());
 
 
 		RCLCPP_INFO_STREAM(
